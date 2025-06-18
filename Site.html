@@ -6,17 +6,17 @@
   <style>
 body {
   font-family: 'Georgia', serif;
-  background-color: #bcbcbc; /* gris tipo VIP Tibia */
-  color: #d7c9a7; /* Color pergamino */
+  background-color: #cfcfcf; /* Fondo gris estilo VIP Tibia */
+  color: #3a2e1f;
   padding: 20px;
   min-height: 100vh;
+  transition: background-color 0.5s ease;
 }
 
 h1 {
   text-align: center;
-  color: #f0e6c8;
-  text-shadow: 1px 1px 2px #000000aa;
-  font-family: 'Cinzel', serif; /* Fuente con estilo medieval si la importas */
+  color: #2f1d0e;
+  text-shadow: 1px 1px 2px #fff;
 }
 
 .guild-section {
@@ -26,10 +26,9 @@ h1 {
 .guild-title {
   font-size: 28px;
   margin-bottom: 10px;
-  border-bottom: 2px solid #a87c42; /* marrón dorado */
+  border-bottom: 2px solid #8a6b45;
   padding-bottom: 5px;
-  color: #e5d4a1;
-  text-shadow: 1px 1px 2px #000000aa;
+  color: #3d2b14;
 }
 
 .guild-container {
@@ -39,28 +38,33 @@ h1 {
 }
 
 .voc-group {
-  background: #f4e9d9; /* Color pergamino */
+  background: #eceae4;
   padding: 12px;
   border-radius: 10px;
-  box-shadow: 3px 3px 8px #3a3a3aaa;
-  border: 2px solid #a67c00; /* borde dorado */
-  color: #5a3e1b;
+  box-shadow: 2px 2px 6px #aaa;
+  border: 2px solid #8a6b45;
+  color: #4b3a2a;
   font-weight: 600;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
 }
 
 .voc-title {
   font-weight: bold;
-  border-bottom: 1px solid #a87c42;
+  border-bottom: 1px solid #8a6b45;
   padding-bottom: 6px;
   margin-bottom: 10px;
   text-align: center;
-  color: #754c24;
+  color: #5b3a1c;
 }
 
 ul {
   list-style: none;
   padding: 0;
-  color: #5a3e1b;
 }
 
 li {
@@ -81,7 +85,6 @@ li {
   cursor: pointer;
   box-shadow: 0 3px 7px #3a3a3aaa;
   transition: background-color 0.3s ease;
-  font-family: 'Georgia', serif;
 }
 
 #enable-sound:hover {
@@ -95,36 +98,26 @@ li {
 
   <div class="guild-section" id="loyalty-section">
     <div class="guild-title">🛡 Loyalty</div>
-    <div class="guild-container" id="loyalty-container">Cargando...</div>
+    <div class="guild-container" id="loyalty-container"></div>
   </div>
 
   <div class="guild-section" id="clickclack-section">
     <div class="guild-title">🏹 Click Clack</div>
-    <div class="guild-container" id="clickclack-container">Cargando...</div>
+    <div class="guild-container" id="clickclack-container"></div>
   </div>
 
   <audio id="alert-sound" src="https://www.myinstants.com/media/sounds/hell_AJWSn3e.mp3" preload="auto"></audio>
-  <button id="enable-sound" onclick="enableSound()" style="position: fixed; bottom: 20px; right: 20px; padding: 10px 15px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-  🔊 Activar sonido
-</button>
-
+  <button id="enable-sound" onclick="enableSound()">🔊 Activar sonido</button>
 
   <script>
     const alertSound = document.getElementById("alert-sound");
+    let soundEnabled = false;
 
-let soundEnabled = false;
-
-function enableSound() {
-  soundEnabled = true;
-  document.getElementById("enable-sound").style.display = "none";
-  alertSound.play().catch(() => {}); // Inicializa audio con interacción
-}
-
-// Habilitar sonido al primer clic del usuario en cualquier parte
-//document.addEventListener("click", () => {
-//  if (!soundEnabled) enableSound();
-//});
-
+    function enableSound() {
+      soundEnabled = true;
+      document.getElementById("enable-sound").style.display = "none";
+      alertSound.play().catch(() => {});
+    }
 
     const monitoredGuilds = [
       { name: "Loyalty", elementId: "loyalty-container" },
@@ -132,6 +125,11 @@ function enableSound() {
     ];
 
     let lastContraOnline = [];
+    let contraConnections = [];
+
+    function getTimestamp() {
+      return Date.now();
+    }
 
     function mapVocation(vocation) {
       const v = vocation.toLowerCase();
@@ -143,15 +141,7 @@ function enableSound() {
       return "Otros";
     }
 
-let contraConnections = [];
-function getTimestamp() {
-  return Date.now();
-}
-
-
     async function loadGuild(guildName, containerId, playSoundOnConnect = false) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = "Cargando...";
       try {
         const res = await fetch(`https://api.tibiadata.com/v4/guild/${encodeURIComponent(guildName)}`);
         if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
@@ -159,120 +149,100 @@ function getTimestamp() {
         const members = json.guild.members;
         const online = members.filter(m => m.status === "online");
 
-if (playSoundOnConnect && soundEnabled && guildName === "Contra") {
-  const currentOnlineNames = online.map(m => m.name);
-  const newlyConnected = currentOnlineNames.filter(name => !lastContraOnline.includes(name));
-  const now = getTimestamp();
+        const container = document.getElementById(containerId);
+        const newContent = document.createElement("div");
+        newContent.className = "guild-container";
 
-  // Guardamos las nuevas conexiones con timestamp
-  newlyConnected.forEach(name => {
-    contraConnections.push({ name, time: now });
-  });
-
-  lastContraOnline = currentOnlineNames;
-
-  // Filtrar solo conexiones en los últimos 20 segundos (20000 ms)
-  contraConnections = contraConnections.filter(conn => now - conn.time <= 20000);
-
-  if (contraConnections.length > 5) {
-    alertSound.play().catch(e => console.warn("Audio bloqueado por el navegador:", e));
-  }
-} else if (playSoundOnConnect && soundEnabled) {
-  // Sonido para otras guilds (opcional)
-  const currentOnlineNames = online.map(m => m.name);
-  const newlyConnected = currentOnlineNames.filter(name => !lastContraOnline.includes(name));
-  if (newlyConnected.length > 0) {
-    alertSound.play().catch(e => console.warn("Audio bloqueado por el navegador:", e));
-  }
-  lastContraOnline = currentOnlineNames;
-}
-
-
-
-        const groups = {
-          Knight: [],
-          Druid: [],
-          Sorcerer: [],
-          Paladin: [],
-          Monk: [],
-          Otros: []
-        };
-
+        const groups = { Knight: [], Druid: [], Sorcerer: [], Paladin: [], Monk: [], Otros: [] };
         online.forEach(member => {
           groups[mapVocation(member.vocation)].push(member);
         });
 
-        container.innerHTML = "";
-
         let totalOnline = 0;
+
         for (const [grupo, lista] of Object.entries(groups)) {
           if (lista.length > 0) {
             totalOnline += lista.length;
             const div = document.createElement("div");
             div.className = "voc-group";
+
             const title = document.createElement("div");
             title.className = "voc-title";
             title.textContent = `${grupo}s (${lista.length})`;
+
             const ul = document.createElement("ul");
             lista.sort((a, b) => b.level - a.level);
             lista.forEach(member => {
-  const li = document.createElement("li");
-  const nameText = `${member.name} (lvl ${member.level})`;
+              const li = document.createElement("li");
+              const nameSpan = document.createElement("span");
+              nameSpan.textContent = `${member.name} (lvl ${member.level})`;
 
-  // Crear texto del nombre
-  const nameSpan = document.createElement("span");
-  nameSpan.textContent = nameText;
+              const copyBtn = document.createElement("button");
+              copyBtn.textContent = "📋";
+              copyBtn.style.marginLeft = "8px";
+              copyBtn.style.cursor = "pointer";
+              copyBtn.style.border = "none";
+              copyBtn.style.background = "transparent";
+              copyBtn.style.fontSize = "16px";
+              copyBtn.title = `Copiar: exiva "${member.name}"`;
 
-  // Crear botón de copia
-  const copyBtn = document.createElement("button");
-  copyBtn.textContent = "📋";
-  copyBtn.style.marginLeft = "8px";
-  copyBtn.style.cursor = "pointer";
-  copyBtn.style.border = "none";
-  copyBtn.style.background = "transparent";
-  copyBtn.style.fontSize = "16px";
-  copyBtn.title = `Copiar: exiva "${member.name}"`;
-  
-  copyBtn.addEventListener("click", () => {
-    const textToCopy = `exiva "${member.name}"`;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      copyBtn.textContent = "✅";
-      setTimeout(() => {
-        copyBtn.textContent = "📋";
-      }, 1000);
-    });
-  });
+              copyBtn.addEventListener("click", () => {
+                navigator.clipboard.writeText(`exiva "${member.name}"`).then(() => {
+                  copyBtn.textContent = "✅";
+                  setTimeout(() => { copyBtn.textContent = "📋"; }, 1000);
+                });
+              });
 
-  li.appendChild(nameSpan);
-  li.appendChild(copyBtn);
-  ul.appendChild(li);
-});
+              li.appendChild(nameSpan);
+              li.appendChild(copyBtn);
+              ul.appendChild(li);
+            });
 
             div.appendChild(title);
             div.appendChild(ul);
-            container.appendChild(div);
+            newContent.appendChild(div);
           }
         }
 
         if (totalOnline === 0) {
-          container.innerHTML = "<p>No hay miembros conectados.</p>";
+          newContent.innerHTML = "<p>No hay miembros conectados.</p>";
+        }
+
+        // Sustituir contenido suavemente
+        container.innerHTML = "";
+        container.appendChild(newContent);
+
+        // Sonido
+        if (playSoundOnConnect && soundEnabled) {
+          const currentOnlineNames = online.map(m => m.name);
+          const newlyConnected = currentOnlineNames.filter(name => !lastContraOnline.includes(name));
+          const now = getTimestamp();
+
+          newlyConnected.forEach(name => {
+            contraConnections.push({ name, time: now });
+          });
+
+          lastContraOnline = currentOnlineNames;
+          contraConnections = contraConnections.filter(conn => now - conn.time <= 20000);
+
+          if (contraConnections.length > 5) {
+            alertSound.play().catch(e => console.warn("Audio bloqueado:", e));
+          }
         }
 
       } catch (err) {
+        const container = document.getElementById(containerId);
         container.innerHTML = `<p>Error: ${err.message}</p>`;
       }
     }
 
-async function refreshAll() {
-  // Cargar Loyalty sin sonido
-  await loadGuild("Loyalty", "loyalty-container");
-
-  // Cargar Click Clack con sonido si hay nuevas conexiones
-  await loadGuild("Click Clack", "clickclack-container", true);
-}
+    async function refreshAll() {
+      await loadGuild("Loyalty", "loyalty-container");
+      await loadGuild("Click Clack", "clickclack-container", true);
+    }
 
     refreshAll();
-    setInterval(refreshAll, 15000);
+    setInterval(refreshAll, 5000);
   </script>
 
 </body>
