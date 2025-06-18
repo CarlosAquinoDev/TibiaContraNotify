@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Guild Monitor Tibia</title>
+  <style>
+body {
+  font-family: 'Georgia', serif;
+  background: linear-gradient(135deg, #2f3e2f, #1a251a); /* Verde oscuro */
+  color: #d7c9a7; /* Color pergamino */
+  padding: 20px;
+  min-height: 100vh;
+}
+
+h1 {
+  text-align: center;
+  color: #f0e6c8;
+  text-shadow: 1px 1px 2px #000000aa;
+  font-family: 'Cinzel', serif; /* Fuente con estilo medieval si la importas */
+}
+
+.guild-section {
+  margin-bottom: 40px;
+}
+
+.guild-title {
+  font-size: 28px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #a87c42; /* marrón dorado */
+  padding-bottom: 5px;
+  color: #e5d4a1;
+  text-shadow: 1px 1px 2px #000000aa;
+}
+
+.guild-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.voc-group {
+  background: #f4e9d9; /* Color pergamino */
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 3px 3px 8px #3a3a3aaa;
+  border: 2px solid #a67c00; /* borde dorado */
+  color: #5a3e1b;
+  font-weight: 600;
+}
+
+.voc-title {
+  font-weight: bold;
+  border-bottom: 1px solid #a87c42;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #754c24;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  color: #5a3e1b;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* Botón */
+#enable-sound {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 18px;
+  font-size: 16px;
+  background-color: #a87c42;
+  color: #f4e9d9;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 7px #3a3a3aaa;
+  transition: background-color 0.3s ease;
+  font-family: 'Georgia', serif;
+}
+
+#enable-sound:hover {
+  background-color: #c2a259;
+}
+  </style>
+</head>
+<body>
+
+  <h1>Monitor de Guilds — Tibia</h1>
+
+  <div class="guild-section" id="loyalty-section">
+    <div class="guild-title">🛡 Loyalty</div>
+    <div class="guild-container" id="loyalty-container">Cargando...</div>
+  </div>
+
+  <div class="guild-section" id="clickclack-section">
+    <div class="guild-title">🏹 Click Clack</div>
+    <div class="guild-container" id="clickclack-container">Cargando...</div>
+  </div>
+
+  <audio id="alert-sound" src="https://www.myinstants.com/media/sounds/hell_AJWSn3e.mp3" preload="auto"></audio>
+  <button id="enable-sound" onclick="enableSound()" style="position: fixed; bottom: 20px; right: 20px; padding: 10px 15px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+  🔊 Activar sonido
+</button>
+
+
+  <script>
+    const alertSound = document.getElementById("alert-sound");
+
+let soundEnabled = false;
+
+function enableSound() {
+  soundEnabled = true;
+  document.getElementById("enable-sound").style.display = "none";
+  alertSound.play().catch(() => {}); // Inicializa audio con interacción
+}
+
+// Habilitar sonido al primer clic del usuario en cualquier parte
+document.addEventListener("click", () => {
+  if (!soundEnabled) enableSound();
+});
+
+
+    const monitoredGuilds = [
+      { name: "Loyalty", elementId: "loyalty-container" },
+      { name: "Click Clack", elementId: "clickclack-container" }
+    ];
+
+    let lastContraOnline = [];
+
+    function mapVocation(vocation) {
+      const v = vocation.toLowerCase();
+      if (v.includes("knight")) return "Knight";
+      if (v.includes("druid")) return "Druid";
+      if (v.includes("sorcerer")) return "Sorcerer";
+      if (v.includes("paladin")) return "Paladin";
+      if (v.includes("monk")) return "Monk";
+      return "Otros";
+    }
+
+let contraConnections = [];
+function getTimestamp() {
+  return Date.now();
+}
+
+
+    async function loadGuild(guildName, containerId, playSoundOnConnect = false) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "Cargando...";
+      try {
+        const res = await fetch(`https://api.tibiadata.com/v4/guild/${encodeURIComponent(guildName)}`);
+        if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+        const json = await res.json();
+        const members = json.guild.members;
+        const online = members.filter(m => m.status === "online");
+
+if (playSoundOnConnect && soundEnabled && guildName === "Contra") {
+  const currentOnlineNames = online.map(m => m.name);
+  const newlyConnected = currentOnlineNames.filter(name => !lastContraOnline.includes(name));
+  const now = getTimestamp();
+
+  // Guardamos las nuevas conexiones con timestamp
+  newlyConnected.forEach(name => {
+    contraConnections.push({ name, time: now });
+  });
+
+  lastContraOnline = currentOnlineNames;
+
+  // Filtrar solo conexiones en los últimos 20 segundos (20000 ms)
+  contraConnections = contraConnections.filter(conn => now - conn.time <= 20000);
+
+  if (contraConnections.length > 5) {
+    alertSound.play().catch(e => console.warn("Audio bloqueado por el navegador:", e));
+  }
+} else if (playSoundOnConnect && soundEnabled) {
+  // Sonido para otras guilds (opcional)
+  const currentOnlineNames = online.map(m => m.name);
+  const newlyConnected = currentOnlineNames.filter(name => !lastContraOnline.includes(name));
+  if (newlyConnected.length > 0) {
+    alertSound.play().catch(e => console.warn("Audio bloqueado por el navegador:", e));
+  }
+  lastContraOnline = currentOnlineNames;
+}
+
+
+
+        const groups = {
+          Knight: [],
+          Druid: [],
+          Sorcerer: [],
+          Paladin: [],
+          Monk: [],
+          Otros: []
+        };
+
+        online.forEach(member => {
+          groups[mapVocation(member.vocation)].push(member);
+        });
+
+        container.innerHTML = "";
+
+        let totalOnline = 0;
+        for (const [grupo, lista] of Object.entries(groups)) {
+          if (lista.length > 0) {
+            totalOnline += lista.length;
+            const div = document.createElement("div");
+            div.className = "voc-group";
+            const title = document.createElement("div");
+            title.className = "voc-title";
+            title.textContent = `${grupo}s (${lista.length})`;
+            const ul = document.createElement("ul");
+            lista.forEach(member => {
+              const li = document.createElement("li");
+              li.textContent = `${member.name} (lvl ${member.level})`;
+              ul.appendChild(li);
+            });
+            div.appendChild(title);
+            div.appendChild(ul);
+            container.appendChild(div);
+          }
+        }
+
+        if (totalOnline === 0) {
+          container.innerHTML = "<p>No hay miembros conectados.</p>";
+        }
+
+      } catch (err) {
+        container.innerHTML = `<p>Error: ${err.message}</p>`;
+      }
+    }
+
+async function refreshAll() {
+  // Cargar Loyalty sin sonido
+  await loadGuild("Loyalty", "loyalty-container");
+
+  // Cargar Click Clack con sonido si hay nuevas conexiones
+  await loadGuild("Click Clack", "clickclack-container", true);
+}
+
+    refreshAll();
+    setInterval(refreshAll, 15000);
+  </script>
+
+</body>
+</html>
