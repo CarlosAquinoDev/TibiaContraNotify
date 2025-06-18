@@ -216,10 +216,38 @@ if (playSoundOnConnect && soundEnabled && guildName === "Contra") {
             const ul = document.createElement("ul");
             lista.sort((a, b) => b.level - a.level);
             lista.forEach(member => {
-              const li = document.createElement("li");
-              li.textContent = `${member.name} (lvl ${member.level})`;
-              ul.appendChild(li);
-            });
+  const li = document.createElement("li");
+  const nameText = `${member.name} (lvl ${member.level})`;
+
+  // Crear texto del nombre
+  const nameSpan = document.createElement("span");
+  nameSpan.textContent = nameText;
+
+  // Crear botón de copia
+  const copyBtn = document.createElement("button");
+  copyBtn.textContent = "📋";
+  copyBtn.style.marginLeft = "8px";
+  copyBtn.style.cursor = "pointer";
+  copyBtn.style.border = "none";
+  copyBtn.style.background = "transparent";
+  copyBtn.style.fontSize = "16px";
+  copyBtn.title = `Copiar: exiva"${member.name}"`;
+  
+  copyBtn.addEventListener("click", () => {
+    const textToCopy = `exiva"${member.name}"`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      copyBtn.textContent = "✅";
+      setTimeout(() => {
+        copyBtn.textContent = "📋";
+      }, 1000);
+    });
+  });
+
+  li.appendChild(nameSpan);
+  li.appendChild(copyBtn);
+  ul.appendChild(li);
+});
+
             div.appendChild(title);
             div.appendChild(ul);
             container.appendChild(div);
