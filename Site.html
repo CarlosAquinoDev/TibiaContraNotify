@@ -214,6 +214,7 @@ if (playSoundOnConnect && soundEnabled && guildName === "Contra") {
             title.className = "voc-title";
             title.textContent = `${grupo}s (${lista.length})`;
             const ul = document.createElement("ul");
+            lista.sort((a, b) => b.level - a.level);
             lista.forEach(member => {
               const li = document.createElement("li");
               li.textContent = `${member.name} (lvl ${member.level})`;
