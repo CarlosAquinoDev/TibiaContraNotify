@@ -234,7 +234,7 @@ if (playSoundOnConnect && soundEnabled && guildName === "Contra") {
   copyBtn.title = `Copiar: exiva "${member.name}"`;
   
   copyBtn.addEventListener("click", () => {
-    const textToCopy = `exiva"${member.name}"`;
+    const textToCopy = `exiva "${member.name}"`;
     navigator.clipboard.writeText(textToCopy).then(() => {
       copyBtn.textContent = "✅";
       setTimeout(() => {
