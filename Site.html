@@ -3,7 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <title>Guild Monitor Tibia</title>
+<style>
+body {
+  font-family: 'Lucida Console', 'Courier New', monospace;Add commentMore actions
+  background-color: #1d1d1d; /* Gris oscuro */
+  color: #00ff80; /* Verde brillante típico de Tibia */
+  padding: 20px;
+  min-height: 100vh;
+}
 
+h1 {
+  text-align: center;
+  color: #00ff80;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.guild-section {
+  margin-bottom: 40px;
+}
+
+.guild-title {
+  font-size: 24px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #00ff80;
+  padding-bottom: 5px;
+  color: #00ff80;
+}
+
+.guild-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.voc-group {
+  background: #2a2a2a; /* Un gris más claro para los contenedores */
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #00ff80;
+  color: #00ff80;
+  font-weight: normal;
+  font-family: 'Lucida Console', monospace;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.voc-title {
+  font-weight: bold;
+  border-bottom: 1px solid #00ff80;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #00ff80;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 6px;
+  color: #00ff80;
+}
+
+/* Botón */
+#enable-sound {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 18px;
+  font-size: 16px;
+  background-color: #00ff80;
+  color: #1d1d1d;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 7px #000;
+  transition: background-color 0.3s ease;
+}
+
+#enable-sound:hover {
+  background-color: #33ffaa;
+}
+</style>
 </head>
 <body>
 
