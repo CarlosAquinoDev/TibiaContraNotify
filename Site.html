@@ -6,16 +6,20 @@
 <style>
 body {
   font-family: 'Lucida Console', 'Courier New', monospace;
-  background-color: #1d1d1d; /* Gris oscuro */
-  color: #00ff80; /* Verde brillante típico de Tibia */
+  /* Fondo general: acero cepillado diagonal */
+  background: linear-gradient(135deg, #444 0%, #2f2f2f 50%, #444 100%);
+  background-size: 300% 300%;
+  animation: metalShift 10s ease infinite;
+  color: #c0f0b0; /* verde pálido para contraste */
+  margin: 0;
   padding: 20px;
   min-height: 100vh;
 }
 
-h1 {
-  text-align: center;
-  color: #00ff80;
-  text-shadow: 1px 1px 2px #000;
+@keyframes metalShift {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
 }
 
 .guild-section {
@@ -24,12 +28,12 @@ h1 {
 
 .guild-title {
   font-size: 24px;
+  color: #d0f8c0;
+  text-shadow: 1px 1px 2px #000;
   margin-bottom: 10px;
-  border-bottom: 1px solid #00ff80;
-  padding-bottom: 5px;
-  color: #00ff80;
 }
 
+/* Containers de profesiones */
 .guild-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -37,15 +41,20 @@ h1 {
 }
 
 .voc-group {
-  background: #2a2a2a; /* Un gris más claro para los contenedores */
+  /* Fondo metálico más claro */
+  background: linear-gradient(145deg, #3a3a3a, #4e4e4e);
+  border-radius: 8px;
   padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #00ff80;
-  color: #00ff80;
+  /* Bisel exterior */
+  box-shadow: 
+    inset 2px 2px 6px rgba(0,0,0,0.6),
+    inset -2px -2px 6px rgba(255,255,255,0.1),
+    2px 2px 6px rgba(0,0,0,0.4);
+  border: 1px solid rgba(200,200,200,0.2);
+  color: #80ff80;
   font-weight: normal;
-  font-family: 'Lucida Console', monospace;
   opacity: 0;
-  animation: fadeIn 0.8s ease forwards;
+  animation: fadeIn 0.5s ease forwards;
 }
 
 @keyframes fadeIn {
@@ -54,21 +63,16 @@ h1 {
 
 .voc-title {
   font-weight: bold;
-  border-bottom: 1px solid #00ff80;
+  border-bottom: 1px solid rgba(200,200,200,0.3);
   padding-bottom: 6px;
   margin-bottom: 10px;
   text-align: center;
-  color: #00ff80;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
+  color: #a0f0a0;
 }
 
 li {
   margin-bottom: 6px;
-  color: #00ff80;
+  font-size: 14px;
 }
 
 /* Botón */
@@ -76,21 +80,22 @@ li {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  padding: 10px 18px;
-  font-size: 16px;
-  background-color: #00ff80;
-  color: #1d1d1d;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: linear-gradient(145deg, #2f4f2f, #3f5f3f);
+  color: #c0f0b0;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   cursor: pointer;
-  box-shadow: 0 3px 7px #000;
-  transition: background-color 0.3s ease;
+  transition: background 0.3s;
 }
 
 #enable-sound:hover {
-  background-color: #33ffaa;
+  background: linear-gradient(145deg, #3f6f3f, #4f7f4f);
 }
 </style>
+
 </head>
 <body>
 
